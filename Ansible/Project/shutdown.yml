@@ -1,0 +1,10 @@
+---
+- name: Shutdown Ubuntu instances only
+  hosts: all
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Shutdown Ubuntu server
+      community.general.shutdown:
+      when: ansible_facts['distribution'] == "Ubuntu"

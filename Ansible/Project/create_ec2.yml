@@ -1,0 +1,49 @@
+---
+- name: Create 3 EC2 instances using Ansible
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    ansible_python_interpreter: /home/gaurang/ansible-venv/bin/python
+
+    aws_region: ap-south-1
+    instance_type: t3.micro
+
+    key_name: My_key_pair
+    security_group: sg-017c2ba8891fd9148
+    subnet_id: subnet-0ba2c40f7d724f0e0
+
+  tasks:
+    - name: Create EC2 instances
+      amazon.aws.ec2_instance:
+        name: "{{ item.name }}"
+        region: "{{ aws_region }}"
+        key_name: "{{ key_name }}"
+        instance_type: "{{ instance_type }}"
+        image_id: "{{ item.ami }}"
+        security_group: "{{ security_group }}"
+        vpc_subnet_id: "{{ subnet_id }}"
+
+        network:
+          assign_public_ip: true
+
+        state: present
+        wait: true
+
+      loop:
+        - name: ansible-ubuntu-1
+          ami: ami-07e5ce642bbc48c0d
+
+        - name: ansible-ubuntu-2
+          ami: ami-07e5ce642bbc48c0d
+
+        - name: ansible-aws-linux-3
+          ami: ami-0f48d8eda3141f50a
+
+      register: ec2_instances
+
+    - name: Show created instances
+      debug:
+        msg: "Created instance: {{ item.item.name }}"
+      loop: "{{ ec2_instances.results }}"
